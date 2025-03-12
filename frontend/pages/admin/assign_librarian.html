@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Librarians</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #059669;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --background: #f1f5f9;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --primary-gradient-start: #6366f1;
+            --primary-gradient-end: #818cf8;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --surface-white: rgba(255, 255, 255, 0.95);
+            --text-primary: #1f2937;
+            --text-secondary: #64748b;
+            --success: #22c55e;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(129, 140, 248, 0.1));
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-primary);
+            display: flex;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar .navbar-brand {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            padding: 1rem 0;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.9);
+            padding: 0.8rem 1rem;
+            margin: 0.4rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .sidebar .nav-link.active {
+            background: var(--surface-white);
+            color: var(--primary-gradient-start);
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar .nav-link i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+                padding: 1rem 0.5rem;
+            }
+
+            .sidebar .navbar-brand {
+                font-size: 1.2rem;
+                padding: 0.5rem;
+            }
+
+            .sidebar .nav-link span {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            margin-left: 280px;
+            flex-grow: 1;
+            padding: 2rem;
+        }
+
+        .glass-card {
+            background: var(--surface-white);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .card-header h2 {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-header h2 i {
+            color: var(--primary-gradient-start);
+            font-size: 1.75rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            background: var(--surface-white);
+            border-radius: 1rem;
+            overflow: hidden;
+            margin-top: 1.5rem;
+        }
+
+        .table {
+            margin-bottom: 0;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table th {
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: 1rem;
+            background: rgba(99, 102, 241, 0.05);
+            border-bottom: 2px solid rgba(99, 102, 241, 0.1);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.05);
+            font-size: 0.95rem;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(99, 102, 241, 0.02);
+            transform: translateY(-2px);
+        }
+
+        .table .btn-action {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .table .btn-action.unassign {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .table .btn-action.unassign:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            color: var(--text-primary);
+            height: 50px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-gradient-start);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--error), #dc2626);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+
+        .alert {
+            background: var(--surface-white);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .alert i {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .alert-success i {
+            color: var(--success);
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .alert-danger i {
+            color: var(--error);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .alert-warning i {
+            color: var(--warning);
+        }
+
+        /* Message Styles */
+        .message {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .message.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .message i {
+            font-size: 1.25rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+            }
+
+            .sidebar .nav-link span {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 80px;
+            }
+
+            .sidebar .navbar-brand {
+                font-size: 1.2rem;
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="navbar-brand">📚 LMS</div>
+        <div class="navbar-nav">
+            <a class="nav-link" href="dashboard.php"><i class="fas fa-home"></i><span>Dashboard</span></a>
+            <a class="nav-link" href="settings.php">
+                <i class="fas fa-user-check"></i>
+                <span>Approve Users</span>
+                <span class="badge badge-danger pending-count"></span>
+            </a>
+            <a class="nav-link" href="view_users.php"><i class="fas fa-users"></i><span>View Users</span></a>
+            <a class="nav-link" href="add_user.php"><i class="fas fa-user-plus"></i><span>Add User</span></a>
+         
+            <a class="nav-link" href="view_branch.php"><i class="fas fa-building"></i><span>View Branches</span></a>
+            <a class="nav-link" href="add_branch.php"><i class="fas fa-plus-circle"></i><span>Add Branch</span></a>
+       
+            <a class="nav-link active" href="assign_librarian.html"><i class="fas fa-user-tie"></i><span>Assign Librarian</span></a>
+            <a class="nav-link" href="admin_dashboard.php"><i class="fas fa-user-shield"></i><span>Assign Role</span></a>
+            <a class="nav-link" href="action_log.php"><i class="fas fa-history"></i><span>Librarian Actions</span></a>
+            <a class="nav-link" href="../../login.html"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="glass-card">
+            <div class="card-header">
+                <h2>Assign Librarians to Library Branches</h2>
+            </div>
+            <div class="card-body">
+                <!-- Message container inside the card -->
+                <div id="messageContainer"></div>
+
+                <form id="assignForm" class="mb-4">
+                    <div class="form-group mb-3">
+                        <label for="librarian" class="form-label">Select Librarian:</label>
+                        <select id="librarian" name="librarian_id" class="form-control" required>
+                            <option value="">Select Librarian</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="branch" class="form-label">Select Library Branch:</label>
+                        <select id="branch" name="library_branch_id" class="form-control" required>
+                            <option value="">Select Branch</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i>
+                            Assign
+                        </button>
+                        <button type="button" id="unassignBtn" class="btn btn-danger">
+                            <i class="fas fa-user-minus"></i>
+                            Unassign
+                        </button>
+                    </div>
+                </form>
+
+                <h5 class="mt-4 mb-3">Current Assignments</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Librarian</th>
+                                <th>Library Branch</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assignedTable">
+                            <!-- Assigned librarians will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            loadLibrarians();
+            loadBranches();
+            loadAssignedLibrarians();
+
+            // Function to display messages
+            function showMessage(message, type = 'success') {
+                const messageContainer = document.getElementById('messageContainer');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                messageDiv.innerHTML = `
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    ${message}
+                `;
+                
+                // Clear previous messages
+                messageContainer.innerHTML = '';
+                messageContainer.appendChild(messageDiv);
+
+                // Auto-hide message after 5 seconds
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 5000);
+            }
+
+            // Fetch available librarians
+            function loadLibrarians() {
+                $.get('fetch_librarians.php', function (data) {
+                    $('#librarian').html('<option value="">Select Librarian</option>' + data);
+                });
+            }
+
+            // Fetch available library branches
+            function loadBranches() {
+                $.get('fetch_branches.php', function (data) {
+                    $('#branch').html('<option value="">Select Branch</option>' + data);
+                });
+            }
+
+            // Fetch assigned librarians
+            function loadAssignedLibrarians() {
+                $.get('fetch_assigned_librarians.php', function (data) {
+                    $('#assignedTable').html(data);
+                });
+            }
+
+            // Assign librarian
+            $('#assignForm').submit(function (e) {
+                e.preventDefault();
+                $.post('assign_librarian.php', $(this).serialize(), function (response) {
+                    try {
+                        const data = JSON.parse(response);
+                        showMessage(data.message, data.success ? 'success' : 'error');
+                        if (data.success) {
+                            loadAssignedLibrarians();
+                        }
+                    } catch (error) {
+                        showMessage(response, 'error');
+                    }
+                });
+            });
+
+            // Unassign librarian
+            $('#unassignBtn').click(function () {
+                let librarian_id = $('#librarian').val();
+                if (librarian_id) {
+                    $.post('unassign_librarian.php', { librarian_id: librarian_id }, function (response) {
+                        try {
+                            const data = JSON.parse(response);
+                            showMessage(data.message, data.success ? 'success' : 'error');
+                            if (data.success) {
+                                loadAssignedLibrarians();
+                            }
+                        } catch (error) {
+                            showMessage(response, 'error');
+                        }
+                    });
+                } else {
+                    showMessage('Please select a librarian to unassign.', 'error');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    
+    <!-- Load Google Sign-In API -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <!-- Add jQuery for better AJAX handling -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Modern UI Styles with Glass Effect */
+        body {
+            background: linear-gradient(135deg, #6366f1, #818cf8);
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            width: 380px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 1rem;
+            margin-bottom: 20px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(8px);
+            border: 1px solid;
+            transition: all 0.3s ease;
+        }
+
+        .error-message {
+            background: rgba(254, 226, 226, 0.9);
+            color: #dc2626;
+            border-color: rgba(220, 38, 38, 0.3);
+        }
+
+        .success-message {
+            background: rgba(220, 252, 231, 0.9);
+            color: #059669;
+            border-color: rgba(5, 150, 105, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #374151;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 1rem;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        input:focus, select:focus {
+            border-color: #6366f1;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            background: linear-gradient(135deg, #6366f1, #818cf8);
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 1rem;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .google-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #374151;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 14px;
+            padding: 12px;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .google-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: #6366f1;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #6b7280;
+            position: relative;
+        }
+
+        .divider:before, .divider:after {
+            content: "";
+            position: absolute;
+            width: 40%;
+            height: 1px;
+            background: rgba(99, 102, 241, 0.2);
+            top: 50%;
+        }
+
+        .divider:before { left: 0; }
+        .divider:after { right: 0; }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+
+        .footer a {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Create an Account</h2>
+
+        <!-- Message Container -->
+        <div id="message" class="message"></div>
+
+        <!-- Google Login -->
+        <div id="g_id_onload"
+            data-client_id="82024518752-tbc9pff158st1pbbkkcnobnlrjnkm8lf.apps.googleusercontent.com"
+            data-context="signup"
+            data-ux_mode="popup"
+            data-callback="handleGoogleResponse"
+            data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin"
+            data-type="standard"
+            data-shape="rectangular"
+            data-theme="outline"
+            data-text="continue_with"
+            data-size="large"
+            data-logo_alignment="left">
+        </div>
+
+        <div class="divider">OR</div>
+
+        <!-- Manual Registration Form -->
+        <form id="registrationForm" onsubmit="return handleSubmit(event)">
+            <div class="input-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="input-group">
+                <label for="email">Email (Gmail only)</label>
+                <input type="email" id="email" name="email" required pattern=".*@gmail\.com$">
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required minlength="6">
+            </div>
+
+            <div class="input-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+            </div>
+
+            <div class="input-group">
+                <label for="type">Register as</label>
+                <select id="type" name="type" required>
+                    <option value="">Select a role</option>
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="librarian">Librarian</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn">Register</button>
+        </form>
+
+        <div class="footer">
+            Already have an account? <a href="login.html">Login here</a>
+        </div>
+    </div>
+
+    <script>
+        function showMessage(message, isError = true) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.className = 'message ' + (isError ? 'error-message' : 'success-message');
+            
+            // Auto-hide success messages after 5 seconds
+            if (!isError) {
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            // Clear any existing messages
+            document.getElementById('message').style.display = 'none';
+            
+            const formData = new FormData(event.target);
+            
+            // Client-side validation
+            const password = formData.get('password');
+            const confirmPassword = formData.get('confirm-password');
+            const email = formData.get('email');
+            
+            if (!email.endsWith('@gmail.com')) {
+                showMessage('Please use a Gmail address');
+                return false;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters long');
+                return false;
+            }
+            
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match');
+                return false;
+            }
+
+            // Submit form via AJAX
+            fetch('../backend-php/register.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('Registration successful! Redirecting...', false);
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 2000);
+                } else {
+                    showMessage(data.message);
+                }
+            })
+            .catch(error => {
+                showMessage('An error occurred. Please try again later.');
+                console.error('Error:', error);
+            });
+
+            return false;
+        }
+
+        function handleGoogleResponse(response) {
+            const credential = response.credential;
+            
+            // Decode the JWT token
+            const payload = JSON.parse(atob(credential.split('.')[1]));
+            
+            // Create form data with Google user info
+            const formData = new FormData();
+            formData.append('name', payload.name);
+            formData.append('email', payload.email);
+            formData.append('password', 'google_auth_' + Math.random().toString(36).slice(2));
+            formData.append('confirm-password', formData.get('password'));
+            formData.append('type', 'student'); // Default type for Google sign-in
+            
+            // Submit to backend
+            fetch('../backend-php/register.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('Registration successful! Redirecting...', false);
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 2000);
+                } else {
+                    showMessage(data.message);
+                }
+            })
+            .catch(error => {
+                showMessage('An error occurred. Please try again later.');
+                console.error('Error:', error);
+            });
+        }
+
+        // Initialize type selection
+        $(document).ready(function() {
+            const typeSelect = $('#type');
+            typeSelect.on('change', function() {
+                const selectedRole = $(this).val();
+                if (selectedRole) {
+                    typeSelect.removeClass('error');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
