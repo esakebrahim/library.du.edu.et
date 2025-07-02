@@ -1,4 +1,4 @@
-To successfully run the code you should follow the folloeing steps
+To successfully run the code you should follow the following steps
 1, download the code
 2, copy the code into C:\xampp\htdocs(default)
 3, create a databse named esak in mysql databse
